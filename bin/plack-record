@@ -22,3 +22,28 @@ $runner->run(builder {
     enable 'Recorder', output => \*STDOUT;
     $app;
 })
+
+__END__
+
+# PODNAME: plack-record
+
+# ABSTRACT: Utility script for recording PSGI app requests
+
+=head1 SYNOPSIS
+
+  plack-record > requests.out
+
+=head1 DESCRIPTION
+
+This script records the requests that go to your PSGI application and writes
+their serialized forms to standard output.
+
+=head1 OPTIONS
+
+Supports all options that L<plackup> does
+
+=head1 SEE ALSO
+
+L<plackup>, L<Plack::Middleware::Recorder>
+
+=cut
