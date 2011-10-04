@@ -86,8 +86,43 @@ This middleware records the stream of requests and responses that your
 application goes through to a file.  See Plack::Util::RequestProcessor
 for more.
 
-=head1 FUNCTIONS
+=head1 OPTIONS
+
+=head2 output
+
+Either a filename, a glob reference, or an IO::Handle where the serialized
+requests will be written to.  To read these requests, use L<Plack::VCR>.
+
+=head1 RATIONALE
+
+This module was written to scratch a fairly specific itch of mine, but one I
+encounter often.  I work on a lot of Javascript-heavy web applications for my
+job, and I often have to fix bugs that only rear their ugly heads a dozen
+clicks or so into the application.  Obviously, if the bug is in the
+Javascript, there's not much I can do about it, but often the problem comes
+from the output I receive from the server.  This middleware allows me to set
+up debugging statements in the server and replay the requests the frontend
+is submitting to get me on the right track.
+
+=head1 FURTHER IMPROVEMENTS
+
+The first release of this distribution is fairly simple; it only records and
+retrieves requests.  In the future, I'd like a bunch of features to be added:
+
+=head2 Specifying the output as a filename doesn't work properly with CGI (the middleware clobbers the output file)
+
+=head2 Recording responses could be useful for generating test scripts and the like.
+
+=head2 On that note, a script/convenience module for generating test scripts would be nice.
+
+=head2 Currently, authorization works by just copying headers blindly.  This logic could be improved with application-specific hooks.
+
+=head2 Request bodies are recorded directly in the output stream, and an in-memory representation is used for psgi.input.  This could be better.
+
+=head2 Others
 
 =head1 SEE ALSO
+
+L<CatalystX::Test::Recorder>, L<https://github.com/miyagawa/Plack-Middleware-Test-Recorder>, L<Plack::VCR>
 
 =cut

@@ -44,14 +44,39 @@ sub next {
 
 1;
 
-# ABSTRACT:
+# ABSTRACT: API for interacting with a frozen request file
 
 __END__
 
 =head1 SYNOPSIS
 
+  use Plack::VCR;
+
+  my $vcr = Plack::VCR->new(filename => 'requests.out');
+
+  while(my $interaction = $vcr->next) {
+    my $req = $interaction->request;
+    # $req is an HTTP::Request object; do something with it
+  }
+
 =head1 DESCRIPTION
 
-=head1 FUNCTIONS
+Plack::VCR provides an API for iterating over the HTTP interactions
+saved to a file by L<Plack::Middleware::Recorder>.
+
+=head1 METHODS
+
+=head2 new(filename => $filename)
+
+Creates a new VCR that will iterate over the interactions contained
+in C<$filename>.
+
+=head2 next
+
+Returns the next HTTP interaction in the stream.
+
+=head1 SEE ALSO
+
+L<Plack::Middleware::Recorder>, L<Plack::VCR::Interaction>
 
 =cut

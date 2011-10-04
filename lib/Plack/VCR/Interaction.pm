@@ -15,12 +15,17 @@ sub new {
 
 __END__
 
-# ABSTRACT:
-
-=head1 SYNOPSIS
+# ABSTRACT: Represents a single HTTP interaction
 
 =head1 DESCRIPTION
 
-=head1 FUNCTIONS
+Retrieved from L<Plack::VCR/next>, objects of this
+class currently only contain an L<HTTP::Request>.
+
+=head1 METHODS
+
+=head2 request
+
+Returns the L<HTTP::Request> for this interaction.
 
 =cut
