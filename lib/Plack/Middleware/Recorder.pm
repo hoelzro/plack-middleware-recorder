@@ -73,7 +73,18 @@ __END__
 
 =head1 SYNOPSIS
 
+  use Plack::Builder;
+
+  builder {
+    enable 'Recorder', output => 'requests.out';
+    $app;
+  };
+
 =head1 DESCRIPTION
+
+This middleware records the stream of requests and responses that your
+application goes through to a file.  See Plack::Util::RequestProcessor
+for more.
 
 =head1 FUNCTIONS
 
