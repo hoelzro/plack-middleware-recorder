@@ -1,0 +1,24 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use Plack::Builder;
+use Plack::Runner;
+use Plack::Middleware::Recorder;
+use Plack::Util;
+
+my $runner = Plack::Runner->new;
+$runner->parse_options(@ARGV);
+
+if($runner->{'help'}) {
+    exec 'plackup', '--help';
+}
+
+my $app = $runner->{'app'} || $runner->{'argv'}[0] || 'app.psgi';
+$app    = Plack::Util::load_psgi $app;
+
+$runner->run(builder {
+    enable 'Recorder', output => \*STDOUT;
+    $app;
+})
