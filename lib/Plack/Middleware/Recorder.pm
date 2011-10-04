@@ -69,7 +69,7 @@ sub call {
 
 __END__
 
-# ABSTRACT:  A short description of Plack::Middleware::Recorder
+# ABSTRACT: Plack middleware that records your client-server interactions
 
 =head1 SYNOPSIS
 
