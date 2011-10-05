@@ -28,4 +28,14 @@ class currently only contain an L<HTTP::Request>.
 
 Returns the L<HTTP::Request> for this interaction.
 
+=begin comment
+
+=over
+
+=item new
+
+=back
+
+=end comment
+
 =cut

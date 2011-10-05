@@ -126,4 +126,14 @@ retrieves requests.  In the future, I'd like a bunch of features to be added:
 
 L<CatalystX::Test::Recorder>, L<https://github.com/miyagawa/Plack-Middleware-Test-Recorder>, L<Plack::VCR>
 
+=begin comment
+
+=over
+
+=item env_to_http_request
+
+=back
+
+=end comment
+
 =cut
