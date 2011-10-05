@@ -21,7 +21,7 @@ $app    = Plack::Util::load_psgi $app;
 $runner->run(builder {
     enable 'Recorder', output => \*STDOUT;
     $app;
-})
+});
 
 __END__
 
