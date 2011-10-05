@@ -40,10 +40,10 @@ their serialized forms to standard output.
 
 =head1 OPTIONS
 
-Supports all options that L<plackup> does
+Supports all options that L<plackup> does.
 
 =head1 SEE ALSO
 
-L<plackup>, L<Plack::Middleware::Recorder>
+L<plackup>, L<Plack::Middleware::Recorder>, L<plack-replay>
 
 =cut
