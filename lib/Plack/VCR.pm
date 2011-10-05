@@ -1,5 +1,7 @@
+## no critic (RequireUseStrict)
 package Plack::VCR;
 
+## use critic (RequireUseStrict)
 use strict;
 use warnings;
 
