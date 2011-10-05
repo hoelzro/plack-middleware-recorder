@@ -47,6 +47,7 @@ sub env_to_http_request {
         print $body $buffer;
     }
 
+    $body->setpos(0);
     $env->{'psgi.input'} = $body;
     $request->content(${ $body->string_ref });
 
