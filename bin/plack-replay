@@ -1,0 +1,65 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use HTTP::Request;
+use LWP::UserAgent;
+use Plack::VCR;
+use URI;
+
+die "usage: $0 [requests file] [optional server]\n" unless @ARGV;
+
+my ( $requests_file, $server ) = @ARGV;
+
+if(defined $server) {
+    $server = 'http://' . $server unless $server =~ m!^https?://!;
+    $server = URI->new($server);
+}
+
+my $vcr = Plack::VCR->new(filename => $requests_file);
+my $ua  = LWP::UserAgent->new;
+
+while(my $interaction = $vcr->next) {
+    my $req      = $interaction->request;
+    my ( $host ) = $req->remove_header('Host');
+
+    if($server) {
+        $host = $server;
+    } else {
+        $host = 'http://' . $host unless $host =~ m!^https?://!;
+        $host = URI->new($host);
+    }
+
+    my $uri = $req->uri;
+    $uri->scheme($host->scheme);
+    $uri->host($host->host);
+    $uri->port($host->port);
+    $req->uri($uri);
+
+    $ua->request($req);
+}
+
+__END__
+
+# PODNAME: plack-replay
+
+# ABSTRACT: Utility script for replaying PSGI app requests
+
+=head1 SYNOPSIS
+
+  plack-replay requests.out
+
+  plack-replay requests.out http://my.server/
+
+=head1 DESCRIPTION
+
+This script replays a sequence of requests previously recorded by
+L<plack-record> against a server.  If the server is not specified,
+the requests are replayed against the server that recorded them.
+
+=head1 SEE ALSO
+
+L<plack-record>, L<Plack::Middleware::Recorder>
+
+=cut
