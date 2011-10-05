@@ -3,12 +3,30 @@
 use strict;
 use warnings;
 
+use Getopt::Long;
 use HTTP::Request;
 use LWP::UserAgent;
 use Plack::VCR;
 use URI;
 
-die "usage: $0 [requests file] [optional server]\n" unless @ARGV;
+sub usage {
+    require Pod::Usage;
+    Pod::Usage::pod2usage(0);
+}
+
+my $parser = Getopt::Long::Parser->new(
+    config => [ qw/no_ignore_case pass_through bundling/ ],
+);
+
+my $help;
+my $verbosity = 0;
+
+$parser->getoptions(
+    'h|help'     => \$help,
+    'v|verbose+' => \$verbosity,
+);
+
+usage if $help || !@ARGV;
 
 my ( $requests_file, $server ) = @ARGV;
 
@@ -37,7 +55,12 @@ while(my $interaction = $vcr->next) {
     $uri->port($host->port);
     $req->uri($uri);
 
-    $ua->request($req);
+    my $res = $ua->request($req);
+    if($verbosity >= 2) {
+        print $res->as_string;
+    } elsif($verbosity == 1) {
+        print $res->status_line, "\n";
+    }
 }
 
 __END__
@@ -57,6 +80,22 @@ __END__
 This script replays a sequence of requests previously recorded by
 L<plack-record> against a server.  If the server is not specified,
 the requests are replayed against the server that recorded them.
+
+=head1 OPTIONS
+
+=over 4
+
+=item -h, --help
+
+Outputs the help for L<plack-replay>.
+
+=item -v, --verbose
+
+Increases the verbosity of L<plack-replay>.  By default, plack replay outputs
+nothing; verbosity level one outputs the status line of each response.
+Verbosity level two outputs each HTTP response in its entirety.
+
+=back 4
 
 =head1 SEE ALSO
 
