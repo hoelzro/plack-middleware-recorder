@@ -17,6 +17,7 @@ sub prepare_app {
     my ( $self ) = @_;
 
     my $output = $self->{'output'};
+    croak "output parameter required" unless defined $output;
 
     $output = $self->{'output'} = IO::File->new($output, 'w') or croak $!
         unless ref $output;
