@@ -6,6 +6,7 @@ use strict;
 use warnings;
 
 use Carp qw(croak);
+use HTTP::Request;
 use Storable qw(thaw);
 use IO::File;
 use Plack::VCR::Interaction;
