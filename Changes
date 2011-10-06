@@ -1,4 +1,6 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.01 October 06 2011
      Initial release.  Supports record and replay of requests.
