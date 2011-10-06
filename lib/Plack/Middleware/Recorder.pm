@@ -6,6 +6,7 @@ use strict;
 use warnings;
 use parent 'Plack::Middleware';
 
+use Carp qw(croak);
 use HTTP::Request;
 use IO::File;
 use IO::String;
@@ -17,7 +18,7 @@ sub prepare_app {
 
     my $output = $self->{'output'};
 
-    $output = $self->{'output'} = IO::File->new($output, 'w') or die $!
+    $output = $self->{'output'} = IO::File->new($output, 'w') or croak $!
         unless ref $output;
 
     $output->autoflush(1);
