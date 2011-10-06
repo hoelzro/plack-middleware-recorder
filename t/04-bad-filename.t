@@ -7,7 +7,11 @@ use Plack::Builder;
 use Plack::VCR;
 use Plack::Test;
 use Test::Exception;
-use Test::More tests => 4;
+use Test::More tests => 5;
+
+dies_ok {
+    Plack::VCR->new;
+};
 
 my $tempfile = File::Temp->new;
 close $tempfile;
