@@ -9,6 +9,7 @@ use Carp qw(croak);
 use Storable qw(thaw);
 use IO::File;
 use Plack::VCR::Interaction;
+use UNIVERSAL;
 
 use namespace::clean;
 
@@ -31,13 +32,17 @@ sub next {
 
     my $size = '';
     my $bytes = $file->read($size, 4);
-    return unless $bytes == 4;
+    return if $bytes == 0;
+    croak "Unexpected end of file" unless $bytes == 4;
 
     $size = unpack('N', $size);
     my $request = '';
     $bytes = $file->read($request, $size);
-    return unless $bytes == $size;
+    croak "Unexpected end of file" unless $bytes == $size;
     $request = thaw($request);
+
+    croak "Invalid file contents"
+        unless UNIVERSAL::isa($request, 'HTTP::Request');
 
     return Plack::VCR::Interaction->new(
         request => $request,
