@@ -17,7 +17,7 @@ sub new {
 
     my $filename = $opts{'filename'} or croak "filename parameter required";
 
-    my $file = IO::File->new($filename, 'r');
+    my $file = IO::File->new($filename, 'r') or croak $!;
 
     return bless {
         file => $file,
