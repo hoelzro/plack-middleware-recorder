@@ -13,8 +13,12 @@ use IO::String;
 use Storable qw(nfreeze thaw);
 use namespace::clean;
 
+use Plack::Util::Accessor qw/active/;
+
 sub prepare_app {
     my ( $self ) = @_;
+
+    $self->active(1);
 
     my $output = $self->{'output'};
     croak "output parameter required" unless defined $output;
@@ -59,11 +63,20 @@ sub env_to_http_request {
 sub call {
     my ( $self, $env ) = @_;
 
-    my $app    = $self->app;
-    my $req    = $self->env_to_http_request($env);
-    my $frozen = nfreeze($req);
-    $self->{'output'}->write(pack('Na*', length($frozen), $frozen));
-    $self->{'output'}->flush;
+    my $app = $self->app;
+
+    if($env->{'PATH_INFO'} =~ m!^/recorder/(start|stop)!) {
+        if($1 eq 'start') {
+            $self->active(1);
+        } else { # $1 eq 'stop'
+            $self->active(0);
+        }
+    } elsif($self->active) {
+        my $req    = $self->env_to_http_request($env);
+        my $frozen = nfreeze($req);
+        $self->{'output'}->write(pack('Na*', length($frozen), $frozen));
+        $self->{'output'}->flush;
+    }
 
     return $app->($env);
 }
