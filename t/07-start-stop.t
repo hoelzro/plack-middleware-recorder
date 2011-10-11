@@ -5,12 +5,14 @@ use lib 't/lib';
 use Plack::Builder;
 use Plack::Recorder::TestUtils;
 use Plack::Test;
-use Test::More tests => 7;
-
-my ( $tempfile, $app ) = Plack::Recorder::TestUtils->get_app;
+use Test::More tests => 8;
 
 my @request_paths;
-$app = builder {
+my $tempfile = File::Temp->new;
+close $tempfile;
+
+my $app = builder {
+    enable 'Recorder', output => $tempfile->filename;
     enable sub {
         my ( $app ) = @_;
 
@@ -22,7 +24,9 @@ $app = builder {
             return $app->($env);
         };
     };
-    $app;
+    sub {
+        [ 200, ['Content-Type' => 'text/plain'], ['OK'] ];
+    };
 };
 
 
@@ -36,7 +40,7 @@ test_psgi $app, sub {
     $cb->(GET '/baz');
 };
 
-my $vcr = Plack::VCR->new(filename => $tempfile);
+my $vcr = Plack::VCR->new(filename => $tempfile->filename);
 my $interaction;
 my $req;
 
