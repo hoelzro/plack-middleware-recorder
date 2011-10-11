@@ -18,7 +18,7 @@ use Plack::Util::Accessor qw/active/;
 sub prepare_app {
     my ( $self ) = @_;
 
-    $self->active(1);
+    $self->active(1) unless defined $self->active;
 
     my $output = $self->{'output'};
     croak "output parameter required" unless defined $output;
