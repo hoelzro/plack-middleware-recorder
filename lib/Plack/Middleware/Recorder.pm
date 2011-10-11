@@ -13,12 +13,14 @@ use IO::String;
 use Storable qw(nfreeze thaw);
 use namespace::clean;
 
-use Plack::Util::Accessor qw/active/;
+use Plack::Util::Accessor qw/active start_url stop_url/;
 
 sub prepare_app {
     my ( $self ) = @_;
 
-    $self->active(1) unless defined $self->active;
+    $self->active(1)                    unless defined $self->active;
+    $self->start_url('/recorder/start') unless defined $self->start_url;
+    $self->stop_url('/recorder/stop')   unless defined $self->stop_url;
 
     my $output = $self->{'output'};
     croak "output parameter required" unless defined $output;
@@ -63,21 +65,24 @@ sub env_to_http_request {
 sub call {
     my ( $self, $env ) = @_;
 
-    my $app = $self->app;
+    my $app       = $self->app;
+    my $start_url = $self->start_url;
+    my $stop_url  = $self->stop_url;
+    my $path      = $env->{'PATH_INFO'};
 
-    if($env->{'PATH_INFO'} =~ m!^/recorder/(start|stop)!) {
-        if($1 eq 'start') {
-            $self->active(1);
-        } else { # $1 eq 'stop'
-            $self->active(0);
-        }
-
+    if($path =~ m!\Q$start_url\E!) {
+        $self->active(1);
         return [
             200,
             ['Content-Type' => 'text/plain'],
-            [ $self->active
-                ? 'Request recording is ON'
-                : 'Request recording is OFF' ],
+            [ 'Request recording is ON' ],
+        ];
+    } elsif($path =~ m!\Q$stop_url\E!) {
+        $self->active(0);
+        return [
+            200,
+            ['Content-Type' => 'text/plain'],
+            [ 'Request recording is OFF' ],
         ];
     } elsif($self->active) {
         my $req    = $self->env_to_http_request($env);
