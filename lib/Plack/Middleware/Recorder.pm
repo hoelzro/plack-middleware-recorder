@@ -71,6 +71,14 @@ sub call {
         } else { # $1 eq 'stop'
             $self->active(0);
         }
+
+        return [
+            200,
+            ['Content-Type' => 'text/plain'],
+            [ $self->active
+                ? 'Request recording is ON'
+                : 'Request recording is OFF' ],
+        ];
     } elsif($self->active) {
         my $req    = $self->env_to_http_request($env);
         my $frozen = nfreeze($req);
