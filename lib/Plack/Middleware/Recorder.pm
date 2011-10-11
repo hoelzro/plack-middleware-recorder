@@ -72,6 +72,7 @@ sub call {
 
     if($path =~ m!\Q$start_url\E!) {
         $self->active(1);
+        $env->{__PACKAGE__ . '.active'} = $self->active;
         return [
             200,
             ['Content-Type' => 'text/plain'],
@@ -79,6 +80,7 @@ sub call {
         ];
     } elsif($path =~ m!\Q$stop_url\E!) {
         $self->active(0);
+        $env->{__PACKAGE__ . '.active'} = $self->active;
         return [
             200,
             ['Content-Type' => 'text/plain'],
@@ -90,6 +92,8 @@ sub call {
         $self->{'output'}->write(pack('Na*', length($frozen), $frozen));
         $self->{'output'}->flush;
     }
+
+    $env->{__PACKAGE__ . '.active'} = $self->active;
 
     return $app->($env);
 }
