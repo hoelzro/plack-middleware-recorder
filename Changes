@@ -1,6 +1,9 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+     - Add /recorder/start, /recorder/stop
+     - Add a debug panel for communicating with the recoder middleware
+     - Add the ability to replay requests against a PSGI application
 
 0.01 October 06 2011
      Initial release.  Supports record and replay of requests.
