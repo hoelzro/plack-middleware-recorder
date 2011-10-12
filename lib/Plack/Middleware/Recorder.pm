@@ -147,6 +147,8 @@ retrieves requests.  In the future, I'd like a bunch of features to be added:
 
 =head2 Specifying the output as a filename doesn't work properly with CGI (the middleware clobbers the output file)
 
+=head2 The middleware probably won't function correctly in a concurrent environment like Starman.
+
 =head2 Recording responses could be useful for generating test scripts and the like.
 
 =head2 On that note, a script/convenience module for generating test scripts would be nice.
