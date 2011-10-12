@@ -83,11 +83,14 @@ __END__
 
   plack-replay requests.out http://my.server/
 
+  plack-replay requests.out app.psgi
+
 =head1 DESCRIPTION
 
 This script replays a sequence of requests previously recorded by
-L<plack-record> against a server.  If the server is not specified,
-the requests are replayed against the server that recorded them.
+L<plack-record> against a server or a PSGI application.  If the server
+is not specified, the requests are replayed against the server that recorded
+them.
 
 =head1 OPTIONS
 

@@ -41,10 +41,15 @@ __END__
 
   plack-record > requests.out
 
+  plack-record app.psgi > requests.out
+
+  plack-record app.psgi requests.out
+
 =head1 DESCRIPTION
 
 This script records the requests that go to your PSGI application and writes
-their serialized forms to standard output.
+their serialized forms to a file.  If no file is provided, the requests are
+written to standard out.
 
 =head1 OPTIONS
 

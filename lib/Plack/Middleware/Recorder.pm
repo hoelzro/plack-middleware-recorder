@@ -112,14 +112,19 @@ __END__
   use Plack::Builder;
 
   builder {
-    enable 'Recorder', output => 'requests.out';
+    enable 'Recorder',
+        output    => 'requests.out',
+        active    => 1,
+        start_url => '/recorder/start',
+        stop_url  => '/recorder/stop';
     $app;
   };
 
 =head1 DESCRIPTION
 
 This middleware records the stream of requests and responses that your
-application goes through to a file.
+application goes through to a file.  The middleware records all requests while
+active; the active state can be altered via L<start_url/""> and L<stop_url/"">.
 
 =head1 OPTIONS
 
@@ -127,6 +132,20 @@ application goes through to a file.
 
 Either a filename, a glob reference, or an IO::Handle where the serialized
 requests will be written to.  To read these requests, use L<Plack::VCR>.
+
+=head2 active
+
+Whether or not to start recording once the application starts.  Defaults to 1.
+
+=head2 start_url
+
+A relative URL that will tell the recorder middleware to record subsequent
+requests if requested.  Defaults to '/recorder/start'.
+
+=head2 stop_url
+
+A relative URL that will tell the recorder middleware to stop recording requests.
+Defaults to '/recorder/stop'.
 
 =head1 RATIONALE
 
@@ -141,7 +160,7 @@ is submitting to get me on the right track.
 
 =head1 FURTHER IMPROVEMENTS
 
-The first release of this distribution is fairly simple; it only records and
+The first release of this distribution was fairly simple; it only records and
 retrieves requests.  In the future, I'd like a bunch of features to be added:
 
 =head2 Specifying the output as a filename doesn't work properly with CGI (the middleware clobbers the output file)

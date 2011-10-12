@@ -60,10 +60,23 @@ HTML
 
 __END__
 
+# ABSTRACT: Plack::Middleware::Debug::Recorder - Debug panel to communicate with the Recorder middleware
+
 =head1 SYNOPSIS
+
+  builder {
+    enable 'Recorder', output => $output;
+    enable 'Debug', panels => [qw/Recorder/];
+    $app;
+  };
 
 =head1 DESCRIPTION
 
-=head1 FUNCTIONS
+This debug panel displays the current state of the recorder middleware (whether or not it's currently recording),
+and provides some buttons for turning recording on or off.
+
+=head1 SEE ALSO
+
+L<Plack::Middleware::Recorder>, L<Plack::Middleware::Debug>
 
 =cut
