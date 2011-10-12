@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.02 October 12 2011
      - Add /recorder/start, /recorder/stop
      - Add a debug panel for communicating with the recorder middleware
      - Add the ability to replay requests against a PSGI file
