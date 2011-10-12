@@ -12,6 +12,11 @@ sub run {
     return sub {
         my ( $res ) = @_;
 
+        unless(exists $env->{'Plack::Middleware::Recorder.active'}) {
+            $panel->disabled(1);
+            return;
+        }
+
         my $status = $env->{'Plack::Middleware::Recorder.active'}
             ? 'ON'
             : 'OFF';
