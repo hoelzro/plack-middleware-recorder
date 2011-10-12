@@ -30,6 +30,10 @@ class currently only contain an L<HTTP::Request>.
 
 Returns the L<HTTP::Request> for this interaction.
 
+=head1 SEE ALSO
+
+L<Plack::VCR>
+
 =begin comment
 
 =over

@@ -113,10 +113,10 @@ __END__
 
   builder {
     enable 'Recorder',
-        output    => 'requests.out',
-        active    => 1,
-        start_url => '/recorder/start',
-        stop_url  => '/recorder/stop';
+        output    => 'requests.out',    # required
+        active    => 1,                 # optional
+        start_url => '/recorder/start', # optional
+        stop_url  => '/recorder/stop';  # optional
     $app;
   };
 
@@ -124,7 +124,7 @@ __END__
 
 This middleware records the stream of requests and responses that your
 application goes through to a file.  The middleware records all requests while
-active; the active state can be altered via L<start_url/""> and L<stop_url/"">.
+active; the active state can be altered via L</start_url> and L</stop_url">.
 
 =head1 OPTIONS
 
