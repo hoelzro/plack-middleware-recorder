@@ -16,17 +16,35 @@ sub run {
             ? 'ON'
             : 'OFF';
 
-        my $color = $status eq 'ON' ? 'green' : 'red';
+        my $color     = $status eq 'ON' ? 'green' : 'red';
+        my $start_url = $env->{'Plack::Middleware::Recorder.start_url'};
+        my $stop_url  = $env->{'Plack::Middleware::Recorder.stop_url'};
 
         my $content = <<HTML;
 <div class='plRecorderStatus'>
 Request recording is <span style='color: $color'>$status</span>
 </div>
 <div>
-    <a href='/recorder/start'>Start Recording</a>
+    <button class='plRecorderStart'>Start Recording</button>
     <br />
-    <a href='/recorder/stop'>Stop Recording</a>
+    <button class='plRecorderStop'>Stop Recording</button>
 </div>
+<script type='text/javascript'>
+    (function(\$) {
+        \$(document).ready(function() {
+            \$('.plRecorderStart').click(function() {
+                \$.get('$start_url', function(data) {
+                    \$('.plRecorderStatus').html('Request recording is <span style="color: green">ON</span>');
+                });
+            });
+            \$('.plRecorderStop').click(function() {
+                \$.get('$stop_url', function(data) {
+                    \$('.plRecorderStatus').html('Request recording is <span style="color: red">OFF</span>');
+                });
+            });
+        });
+    })(jQuery);
+</script>
 HTML
 
         $panel->content($content);
