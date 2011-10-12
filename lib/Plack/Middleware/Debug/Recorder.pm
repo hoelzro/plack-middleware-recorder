@@ -62,7 +62,7 @@ HTML
 
 __END__
 
-# ABSTRACT: Plack::Middleware::Debug::Recorder - Debug panel to communicate with the Recorder middleware
+# ABSTRACT: Debug panel to communicate with the Recorder middleware
 
 =head1 SYNOPSIS
 
