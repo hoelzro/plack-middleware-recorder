@@ -70,6 +70,9 @@ sub call {
     my $stop_url  = $self->stop_url;
     my $path      = $env->{'PATH_INFO'};
 
+    $env->{__PACKAGE__ . '.start_url'} = $start_url;
+    $env->{__PACKAGE__ . '.stop_url'}  = $stop_url;
+
     if($path =~ m!\Q$start_url\E!) {
         $self->active(1);
         $env->{__PACKAGE__ . '.active'} = $self->active;
