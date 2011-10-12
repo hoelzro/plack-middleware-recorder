@@ -6,7 +6,7 @@ use HTML::TreeBuilder;
 use Plack::Builder;
 use Plack::Recorder::TestUtils;
 use Plack::Test;
-use Test::More tests => 10;
+use Test::More tests => 11;
 
 sub test_panel {
     my ( $res, $expected_active, $expected_start, $expected_stop ) = @_;
@@ -172,4 +172,33 @@ test_psgi $app, sub {
     $cb->(GET '/stop-recording');
     $res = $cb->(GET '/');
     test_panel($res, 0, '/start-recording', '/stop-recording');
+};
+
+$app = builder {
+    enable 'Debug', panels => [qw/Recorder/];
+    sub {
+        [ 200, ['Content-Type' => 'text/html'], [$html] ];
+    };
+};
+
+test_psgi $app, sub {
+    my ( $cb ) = @_;
+
+    my $res  = $cb->(GET '/');
+    my $tree = HTML::TreeBuilder->new_from_content($res->content);
+
+    my $panel   = $tree->look_down(
+        _tag  => 'div',
+        class => 'panelContent',
+        sub {
+            my ( $e ) = @_;
+
+            my $title = $e->look_down(_tag => 'div',
+                class => 'plDebugPanelTitle');
+            $title && $title->look_down(_tag => 'h3')->as_text =~ /Recorder/;
+        },
+    );
+
+    ok !$panel, 'no debug panel is found when the recorder middleware is not enabled';
+    $tree->delete;
 };
