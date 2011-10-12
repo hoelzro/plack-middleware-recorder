@@ -15,11 +15,19 @@ if($runner->{'help'}) {
     exec 'plackup', '--help';
 }
 
-my $app = $runner->{'app'} || $runner->{'argv'}[0] || 'app.psgi';
-$app    = Plack::Util::load_psgi $app;
+my $args = $runner->{'argv'};
+my $app  = $runner->{'app'} || $args->[0] || 'app.psgi';
+$app     = Plack::Util::load_psgi $app;
+
+my $output;
+if(@$args > 1) {
+    $output = $args->[1];
+} else {
+    $output = \*STDOUT;
+}
 
 $runner->run(builder {
-    enable 'Recorder', output => \*STDOUT;
+    enable 'Recorder', output => $output;
     $app;
 });
 
