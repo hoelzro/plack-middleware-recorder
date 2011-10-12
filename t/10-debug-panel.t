@@ -3,11 +3,10 @@ use warnings;
 use lib 't/lib';
 
 use HTML::TreeBuilder;
-use List::MoreUtils qw(part);
 use Plack::Builder;
 use Plack::Recorder::TestUtils;
 use Plack::Test;
-use Test::More tests => 2;
+use Test::More tests => 10;
 
 sub test_panel {
     my ( $res, $expected_active, $expected_start, $expected_stop ) = @_;
@@ -31,26 +30,24 @@ sub test_panel {
             class => 'plDebugPanelContent');
         my $status = $content->look_down(_tag => 'div',
             class => 'plRecorderStatus');
+
+        like $content->as_HTML, qr/\Q$expected_start\E/, "$expected_start is present in debug panel";
+        like $content->as_HTML, qr/\Q$expected_stop\E/, "$expected_stop is present in debug panel";
+
         ok $status;
         if($expected_active) {
             like $status->as_text, qr/Request recording is ON/;
         } else {
             like $status->as_text, qr/Request recording is OFF/;
         }
-        my $start;
-        my $stop;
-        my $links = [ $content->look_down(_tag => 'a') ];
 
-        ( $start, $links ) = part { $_->attr('href') eq $expected_start ? 0 : 1 } @$links;
-        $start = $start->[0];
-        ok $start, 'start recording link was found';
+        my $start = $content->look_down(_tag => 'button', class => 'plRecorderStart');
+        ok $start, 'start recording button was found';
+        my $stop = $content->look_down(_tag => 'button', class => 'plRecorderStop');
+        ok $stop, 'stop recording button was found';
+
         like $start->as_text, qr/Start Recording/;
-        ( $stop, $links ) = part { $_->attr('href') eq $expected_stop ? 0 : 1 } @$links;
-        $stop = $stop->[0];
-        ok $stop, 'stop recording link was found';
         like $stop->as_text, qr/Stop Recording/;
-
-        ok !$links, 'no extra links were found';
 
         done_testing;
     };
