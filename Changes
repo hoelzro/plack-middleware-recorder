@@ -4,6 +4,7 @@ Revision history for {{$dist->name}}
      - Add /recorder/start, /recorder/stop
      - Add a debug panel for communicating with the recorder middleware
      - Add the ability to replay requests against a PSGI file
+     - Add ability to specify output file with plack-record
 
 0.01 October 06 2011
      Initial release.  Supports record and replay of requests.
