@@ -6,7 +6,9 @@ use warnings;
 use Getopt::Long;
 use HTTP::Request;
 use LWP::UserAgent;
+use LWP::Protocol::PSGI;
 use Plack::VCR;
+use Plack::Util;
 use URI;
 
 sub usage {
@@ -31,8 +33,14 @@ usage if $help || !@ARGV;
 my ( $requests_file, $server ) = @ARGV;
 
 if(defined $server) {
-    $server = 'http://' . $server unless $server =~ m!^https?://!;
-    $server = URI->new($server);
+    if(-f $server) {
+        my $app = Plack::Util::load_psgi($server);
+        LWP::Protocol::PSGI->register($app);
+        undef $server;
+    } else {
+        $server = 'http://' . $server unless $server =~ m!^https?://!;
+        $server = URI->new($server);
+    }
 }
 
 my $vcr = Plack::VCR->new(filename => $requests_file);
