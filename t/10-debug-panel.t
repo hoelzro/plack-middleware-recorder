@@ -87,3 +87,89 @@ test_psgi $app, sub {
     $res = $cb->(GET '/');
     test_panel($res, 0, '/recorder/start', '/recorder/stop');
 };
+
+$app = builder {
+    enable 'Recorder', output => $tempfile->filename;
+    enable 'Debug', panels => [qw/Recorder/];
+    sub {
+        [ 200, ['Content-Type' => 'text/html'], [$html] ];
+    };
+};
+
+test_psgi $app, sub {
+    my ( $cb ) = @_;
+
+    my $res;
+
+    $res = $cb->(GET '/');
+    test_panel($res, 1, '/recorder/start', '/recorder/stop');
+    $cb->(GET '/recorder/stop');
+    $res = $cb->(GET '/');
+    test_panel($res, 0, '/recorder/start', '/recorder/stop');
+};
+
+$app = builder {
+    enable 'Debug', panels => [qw/Recorder/];
+    enable 'Recorder', output => $tempfile->filename, active => 0;
+    sub {
+        [ 200, ['Content-Type' => 'text/html'], [$html] ];
+    };
+};
+
+test_psgi $app, sub {
+    my ( $cb ) = @_;
+
+    my $res;
+
+    $res = $cb->(GET '/');
+    test_panel($res, 0, '/recorder/start', '/recorder/stop');
+    $cb->(GET '/recorder/start');
+    $res = $cb->(GET '/');
+    test_panel($res, 1, '/recorder/start', '/recorder/stop');
+};
+
+$app = builder {
+    enable 'Debug', panels => [qw/Recorder/];
+    enable 'Recorder',
+        output    => $tempfile->filename,
+        start_url => '/start-recording',
+        stop_url  => '/stop-recording';
+    sub {
+        [ 200, ['Content-Type' => 'text/html'], [$html] ];
+    };
+};
+
+test_psgi $app, sub {
+    my ( $cb ) = @_;
+
+    my $res;
+
+    $res = $cb->(GET '/');
+    test_panel($res, 1, '/start-recording', '/stop-recording');
+    $cb->(GET '/stop-recording');
+    $res = $cb->(GET '/');
+    test_panel($res, 0, '/start-recording', '/stop-recording');
+};
+
+$app = builder {
+    enable 'Recorder',
+        output    => $tempfile->filename,
+        start_url => '/start-recording',
+        stop_url  => '/stop-recording';
+    enable 'Debug', panels => [qw/Recorder/];
+    sub {
+        [ 200, ['Content-Type' => 'text/html'], [$html] ];
+    };
+};
+
+test_psgi $app, sub {
+    my ( $cb ) = @_;
+
+    my $res;
+
+    $res = $cb->(GET '/');
+    test_panel($res, 1, '/start-recording', '/stop-recording');
+    $cb->(GET '/stop-recording');
+    $res = $cb->(GET '/');
+    test_panel($res, 0, '/start-recording', '/stop-recording');
+};
