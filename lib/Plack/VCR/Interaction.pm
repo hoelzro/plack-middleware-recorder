@@ -21,7 +21,7 @@ __END__
 
 =head1 DESCRIPTION
 
-Retrieved from L<Plack::VCR/next>, objects of this
+Retrieved from L<Plack::VCR/next>; objects of this
 class currently only contain an L<HTTP::Request>.
 
 =head1 METHODS
