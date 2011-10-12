@@ -119,8 +119,7 @@ __END__
 =head1 DESCRIPTION
 
 This middleware records the stream of requests and responses that your
-application goes through to a file.  See Plack::Util::RequestProcessor
-for more.
+application goes through to a file.
 
 =head1 OPTIONS
 
