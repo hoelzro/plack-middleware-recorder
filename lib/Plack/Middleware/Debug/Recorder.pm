@@ -1,5 +1,7 @@
+## no critic (RequireUseStrict)
 package Plack::Middleware::Debug::Recorder;
 
+## use critic (RequireUseStrict)
 use strict;
 use warnings;
 use parent 'Plack::Middleware::Debug::Base';
