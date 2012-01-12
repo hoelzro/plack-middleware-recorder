@@ -1,6 +1,8 @@
 use strict;
 use warnings;
 
+use lib 't/lib';
+
 use File::Temp;
 use Plack::Test;
 use Test::More tests => 1;
