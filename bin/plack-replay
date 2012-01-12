@@ -6,6 +6,7 @@ use warnings;
 use Getopt::Long;
 use HTTP::Message::PSGI;
 use HTTP::Request;
+use HTTP::Response;
 use Plack::Client;
 use Plack::VCR;
 use Plack::Util;
