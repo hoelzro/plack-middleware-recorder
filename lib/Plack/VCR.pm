@@ -37,6 +37,9 @@ sub next {
     croak "Unexpected end of file" unless $bytes == 4;
 
     $size = unpack('N', $size);
+    if($size > -s $file) {
+        croak "Invalid file contents";
+    }
     my $request = '';
     $bytes = $file->read($request, $size);
     croak "Unexpected end of file" unless $bytes == $size;
