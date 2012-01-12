@@ -60,9 +60,9 @@ HTML
 
 1;
 
-__END__
-
 # ABSTRACT: Debug panel to communicate with the Recorder middleware
+
+__END__
 
 =head1 SYNOPSIS
 

@@ -103,9 +103,9 @@ sub call {
 
 1;
 
-__END__
-
 # ABSTRACT: Plack middleware that records your client-server interactions
+
+__END__
 
 =head1 SYNOPSIS
 

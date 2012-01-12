@@ -15,9 +15,9 @@ sub new {
 
 1;
 
-__END__
-
 # ABSTRACT: Represents a single HTTP interaction
+
+__END__
 
 =head1 DESCRIPTION
 
