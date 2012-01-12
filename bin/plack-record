@@ -31,11 +31,11 @@ $runner->run(builder {
     $app;
 });
 
-__END__
-
 # PODNAME: plack-record
 
 # ABSTRACT: Utility script for recording PSGI app requests
+
+__END__
 
 =head1 SYNOPSIS
 

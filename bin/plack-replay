@@ -71,11 +71,11 @@ while(my $interaction = $vcr->next) {
     }
 }
 
-__END__
-
 # PODNAME: plack-replay
 
 # ABSTRACT: Utility script for replaying PSGI app requests
+
+__END__
 
 =head1 SYNOPSIS
 
