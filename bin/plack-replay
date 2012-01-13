@@ -117,7 +117,7 @@ Increases the verbosity of L<plack-replay>.  By default, plack replay outputs
 nothing; verbosity level one outputs the status line of each response.
 Verbosity level two outputs each HTTP response in its entirety.
 
-=back 4
+=back
 
 =head1 SEE ALSO
 
