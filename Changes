@@ -3,6 +3,7 @@ Revision history for {{$dist->name}}
 {{$NEXT}}
 
 0.03 January 13 2012
+     - Bug fix (support web applications that use LWP::UserAgent)
 
 0.02 October 12 2011
      - Add /recorder/start, /recorder/stop
