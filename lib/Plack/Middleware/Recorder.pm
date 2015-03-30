@@ -29,6 +29,7 @@ sub prepare_app {
         $self->{output_fh} = $output;
         $output->autoflush(1);
     } else {
+        my $can_write = IO::File->new($output, 'a') || croak $!;
         $self->{output_filename} = $output;
     }
 }
