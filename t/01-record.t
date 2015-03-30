@@ -6,61 +6,73 @@ use File::Temp;
 use Plack::Builder;
 use Plack::VCR;
 use Plack::Test;
-use Test::More tests => 16;
+use Test::More tests => 3;
 
 my $tempfile = File::Temp->new;
 close $tempfile;
 
-my $app = builder {
-    enable 'Recorder', output => $tempfile->filename;
-    sub {
-        [ 200, ['Content-Type' => 'text/plain'], ['OK'] ];
+for ( 1 .. 2 ) {
+    my $app = builder {
+        enable 'Recorder', output => $tempfile->filename;
+        sub {
+            [ 200, ['Content-Type' => 'text/plain'], ['OK'] ];
+        };
     };
-};
 
-test_psgi $app, sub {
-    my ( $cb ) = @_;
+    test_psgi $app, sub {
+        my ( $cb ) = @_;
 
-    $cb->(GET '/');
-    $cb->(GET '/', 'X-Made-Up-Header' => 17);
-    $cb->(POST '/foo', 'X-Made-Up-Header' => 17, Content => [
-        first_name => 'Rob',
-        last_name  => 'Hoelz',
-        full_name  => 'Rob Hoelz',
-    ]);
-    $cb->(GET '/bar?name=Rob%20Hoelz');
-};
+        $cb->(GET '/');
+        $cb->(GET '/', 'X-Made-Up-Header' => 17);
+        $cb->(POST '/foo', 'X-Made-Up-Header' => 17, Content => [
+            first_name => 'Rob',
+            last_name  => 'Hoelz',
+            full_name  => 'Rob Hoelz',
+        ]);
+        $cb->(GET '/bar?name=Rob%20Hoelz');
+    };
+}
 
 my $vcr = Plack::VCR->new(filename => $tempfile->filename);
-my $interaction;
-my $req;
 
-$interaction = $vcr->next;
-ok $interaction;
-$req = $interaction->request;
-is $req->method, 'GET';
-is $req->uri, '/';
+for ( 1 .. 2 ) {
+    subtest "Plack::VCR iteration $_" => sub {
+        plan tests => 15;
 
-$interaction = $vcr->next;
-ok $interaction;
-$req = $interaction->request;
-is $req->method, 'GET';
-is $req->uri, '/';
-is $req->header('X-Made-Up-Header'), 17;
+        my $interaction;
+        my $req;
 
-$interaction = $vcr->next;
-ok $interaction;
-$req = $interaction->request;
-is $req->method, 'POST';
-is $req->uri, '/foo';
-is $req->header('X-Made-Up-Header'), 17;
-is $req->content, 'first_name=Rob&last_name=Hoelz&full_name=Rob+Hoelz';
+        $interaction = $vcr->next;
+        ok $interaction;
+        $req = $interaction->request;
+        is $req->method, 'GET';
+        is $req->uri, '/';
 
-$interaction = $vcr->next;
-ok $interaction;
-$req = $interaction->request;
-is $req->method, 'GET';
-is $req->uri, '/bar?name=Rob%20Hoelz';
+        $interaction = $vcr->next;
+        ok $interaction;
+        $req = $interaction->request;
+        is $req->method, 'GET';
+        is $req->uri, '/';
+        is $req->header('X-Made-Up-Header'), 17;
 
-$interaction = $vcr->next;
-ok ! $interaction;
+        $interaction = $vcr->next;
+        ok $interaction;
+        $req = $interaction->request;
+        is $req->method, 'POST';
+        is $req->uri, '/foo';
+        is $req->header('X-Made-Up-Header'), 17;
+        is $req->content, 'first_name=Rob&last_name=Hoelz&full_name=Rob+Hoelz';
+
+        $interaction = $vcr->next;
+        ok $interaction;
+        $req = $interaction->request;
+        is $req->method, 'GET';
+        is $req->uri, '/bar?name=Rob%20Hoelz';
+    };
+}
+
+subtest 'VCR iterator is done' => sub {
+    plan tests => 1;
+    my $interaction = $vcr->next;
+    ok ! $interaction;
+};

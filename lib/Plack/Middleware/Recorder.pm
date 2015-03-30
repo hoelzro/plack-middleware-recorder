@@ -25,7 +25,7 @@ sub prepare_app {
     my $output = $self->{'output'};
     croak "output parameter required" unless defined $output;
 
-    $output = $self->{'output'} = IO::File->new($output, 'w') or croak $!
+    $output = $self->{'output'} = IO::File->new($output, 'a') or croak $!
         unless ref $output;
 
     $output->autoflush(1);
