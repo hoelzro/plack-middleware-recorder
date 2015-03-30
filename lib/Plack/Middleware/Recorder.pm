@@ -163,17 +163,33 @@ is submitting to get me on the right track.
 The first release of this distribution was fairly simple; it only records and
 retrieves requests.  In the future, I'd like a bunch of features to be added:
 
-=head2 Specifying the output as a filename doesn't work properly with CGI (the middleware clobbers the output file)
+=over 4
 
-=head2 The middleware probably won't function correctly in a concurrent environment like Starman.
+=item *
 
-=head2 Recording responses could be useful for generating test scripts and the like.
+Specifying the output as a filename doesn't work properly with CGI (the middleware clobbers the output file)
 
-=head2 On that note, a script/convenience module for generating test scripts would be nice.
+=item *
 
-=head2 Currently, authorization works by just copying headers blindly.  This logic could be improved with application-specific hooks.
+The middleware probably won't function correctly in a concurrent environment like Starman.
 
-=head2 Request bodies are recorded directly in the output stream, and an in-memory representation is used for psgi.input.  This could be better.
+=item *
+
+Recording responses could be useful for generating test scripts and the like.
+
+=item *
+
+On that note, a script/convenience module for generating test scripts would be nice.
+
+=item *
+
+Currently, authorization works by just copying headers blindly.  This logic could be improved with application-specific hooks.
+
+=item *
+
+Request bodies are recorded directly in the output stream, and an in-memory representation is used for psgi.input.  This could be better.
+
+=back
 
 =head2 Others
 
