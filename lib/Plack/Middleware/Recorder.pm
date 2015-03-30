@@ -167,10 +167,6 @@ retrieves requests.  In the future, I'd like a bunch of features to be added:
 
 =item *
 
-Specifying the output as a filename doesn't work properly with CGI (the middleware clobbers the output file)
-
-=item *
-
 The middleware probably won't function correctly in a concurrent environment like Starman.
 
 =item *
