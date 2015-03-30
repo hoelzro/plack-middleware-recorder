@@ -6,7 +6,7 @@ use File::Temp;
 use Plack::Builder;
 use Plack::VCR;
 use Plack::Test;
-use Test::More tests => 1;
+use Test::More tests => 2;
 
 my @requests = (
     { method => 'GET', uri => '/' },
@@ -19,27 +19,73 @@ my @requests = (
     { method => 'GET', uri => '/bar?name=Rob%20Hoelz' },
 );
 
-subtest 'sending requests' => sub {
-    plan tests => 16;
+subtest 'batch requests to one app instance' => sub {
+    plan tests => 2;
+    foreach my $runonce ( 0 .. 1 ) {
+        subtest "runonce $runonce" => sub {
+            plan tests => 16;
 
-    my $tempfile = File::Temp->new;
-    close $tempfile;
+            my $tempfile = File::Temp->new;
+            close $tempfile;
 
-    my $app = builder {
-        enable 'Recorder', output => $tempfile->filename;
-        sub {
-            [ 200, ['Content-Type' => 'text/plain'], ['OK'] ];
+            my $app = builder {
+                enable runonce_middleware($runonce);
+                enable 'Recorder', output => $tempfile->filename;
+                sub {
+                    [ 200, ['Content-Type' => 'text/plain'], ['OK'] ];
+                };
+            };
+
+            run_test_psgi_for_requests($app, @requests);
+
+            my $vcr = Plack::VCR->new(filename => $tempfile->filename);
+
+            verify_saved_requests($vcr, @requests);
+
+            my $interaction = $vcr->next;
+            ok ! $interaction, 'iterator exhausted';
         };
-    };
+    }
+};
 
-    run_test_psgi_for_requests($app, @requests);
+subtest 'send each request in separate app instance' => sub {
+    plan tests => 2;
+    foreach my $runonce ( 0 .. 1 ) {
+        subtest "runonce $runonce" => sub {
+            my $tempfile = File::Temp->new;
+            close $tempfile;
 
-    my $vcr = Plack::VCR->new(filename => $tempfile->filename);
+            foreach my $request ( @requests ) {
+                my $app = builder {
+                    enable runonce_middleware($runonce);
+                    enable 'Recorder', output => $tempfile->filename;
+                    sub {
+                        [ 200, ['Content-Type' => 'text/plain'], ['OK'] ];
+                    };
+                };
 
-    verify_saved_requests($vcr, @requests);
+                run_test_psgi_for_requests($app, $request);
+            }
 
-    my $interaction = $vcr->next;
-    ok ! $interaction, 'iterator exhausted';
+            my $vcr = Plack::VCR->new(filename => $tempfile->filename);
+
+            if ($runonce) {
+                # in run_once mode (CGI mode), requests are all appended to
+                # the same output file
+                verify_saved_requests($vcr, @requests);
+
+            } else {
+                # not-run_once means the file will be overwritten each time
+                # the PSGI app runs.  Only the last request will be in the
+                # output file
+                verify_saved_requests($vcr, $requests[-1]);
+            }
+
+            my $interaction = $vcr->next;
+            ok ! $interaction, 'iterator exhausted';
+            done_testing();
+        };
+    }
 };
 
 sub run_test_psgi_for_requests {
@@ -113,3 +159,14 @@ sub construct_request_tester {
     };
 }
 
+sub runonce_middleware {
+    my $value = shift;
+    return sub {
+        my $app = shift;
+        sub {
+            my $env = shift;
+            $env->{'psgi.run_once'} = $value;
+            $app->($env);
+        };
+    };
+}
