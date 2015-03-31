@@ -29,6 +29,9 @@ sub prepare_app {
         $self->{'output_fh'} = $output;
         $output->autoflush(1);
     } else {
+        unless(-w $output) {
+            croak "$output is not writable";
+        }
         $self->{'output_filename'} = $output;
     }
 }
