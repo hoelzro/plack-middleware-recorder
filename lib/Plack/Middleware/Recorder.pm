@@ -22,26 +22,26 @@ sub prepare_app {
     $self->start_url('/recorder/start') unless defined $self->start_url;
     $self->stop_url('/recorder/stop')   unless defined $self->stop_url;
 
-    my $output = delete $self->{output};
+    my $output = delete $self->{'output'};
     croak "output parameter required" unless defined $output;
 
     if (ref $output) {
-        $self->{output_fh} = $output;
+        $self->{'output_fh'} = $output;
         $output->autoflush(1);
     } else {
         my $can_write = IO::File->new($output, 'a') || croak $!;
-        $self->{output_filename} = $output;
+        $self->{'output_filename'} = $output;
     }
 }
 
 sub _output_fh {
     my ( $self, $env ) = @_;
-    unless ($self->{output_fh}) {
+    unless ($self->{'output_fh'}) {
         my $mode = $env->{'psgi.run_once'} ? 'a' : 'w';
-        $self->{output_fh} = IO::File->new($self->{output_filename}, $mode);
-        $self->{output_fh}->autoflush(1);
+        $self->{'output_fh'} = IO::File->new($self->{'output_filename'}, $mode);
+        $self->{'output_fh'}->autoflush(1);
     }
-    return $self->{output_fh};
+    return $self->{'output_fh'};
 }
 
 sub env_to_http_request {
