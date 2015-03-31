@@ -11,9 +11,10 @@ use HTTP::Request;
 use IO::File;
 use IO::String;
 use Storable qw(nfreeze thaw);
+use File::Spec;
 use namespace::clean;
 
-use Plack::Util::Accessor qw/active start_url stop_url/;
+use Plack::Util::Accessor qw/active start_url stop_url _lockmgr/;
 
 sub prepare_app {
     my ( $self ) = @_;
@@ -106,6 +107,7 @@ sub call {
         my $req    = $self->env_to_http_request($env);
         my $frozen = nfreeze($req);
 
+        my $guard = $self->_create_concurrency_lock($env);
         my $fh = $self->_output_fh($env);
         $fh->write(pack('Na*', length($frozen), $frozen));
         $fh->flush;
@@ -115,6 +117,29 @@ sub call {
 
     return $app->($env);
 }
+
+sub _create_concurrency_lock {
+    my ( $self, $env ) = @_;
+
+    return undef unless($env->{'psgi.multithread'} || $env->{'psgi.multiprocess'});
+
+    $self->_initialize_locking;
+
+    my $lock = $self->_lockmgr->lock($self->{output_filename});
+    return Scope::Guard->new( sub { $lock->release } );
+}
+
+sub _initialize_locking {
+    my $self = shift;
+
+    unless (defined $self->_lockmgr) {
+        require Scope::Guard;
+        require LockFile::Simple;
+        $self->{output_filename} ||= File::Spec->catdir(File::Spec->tmpdir, 'pm-recorder-output');
+        $self->_lockmgr( LockFile::Simple->make(nfs => 1) );
+    }
+}
+
 
 1;
 
@@ -179,10 +204,6 @@ The first release of this distribution was fairly simple; it only records and
 retrieves requests.  In the future, I'd like a bunch of features to be added:
 
 =over 4
-
-=item *
-
-The middleware probably won't function correctly in a concurrent environment like Starman.
 
 =item *
 
