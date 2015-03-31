@@ -9,9 +9,9 @@ use Plack::Test;
 use Test::More tests => 2;
 
 sub run_test_psgi_for_requests {
-    my $app = shift;
+    my ( $app, $requests ) = @_;
 
-    my @request_senders = map { construct_request_sender($_) } @_;
+    my @request_senders = map { construct_request_sender($_) } @$requests;
 
     test_psgi $app, sub {
         my ( $cb ) = @_;
@@ -20,9 +20,9 @@ sub run_test_psgi_for_requests {
 }
 
 sub verify_saved_requests {
-    my $vcr = shift;
+    my ( $vcr, $requests ) = @_;
 
-    my @request_testers = map { construct_request_tester($_) } @_;
+    my @request_testers = map { construct_request_tester($_) } @$requests;
     foreach my $request_test ( @request_testers ) {
         my $interaction = $vcr->next;
         ok $interaction, 'next interaction';
@@ -31,7 +31,7 @@ sub verify_saved_requests {
 }
 
 sub construct_request_sender {
-    my $req_data = shift;
+    my ( $req_data ) = @_;
 
     my %req_methods = (
         GET => \&GET,
@@ -54,11 +54,11 @@ sub construct_request_sender {
 }
 
 sub construct_request_tester {
-    my $req_data = shift;
+    my ( $req_data ) = @_;
     my($method, $uri, $headers, $content) = @$req_data{'method','uri','headers','content'};
 
     return sub {
-        my $req = shift;
+        my ( $req ) = @_;
 
         is($req->method, $method, 'method');
         is($req->uri, $uri, 'uri');
@@ -80,11 +80,14 @@ sub construct_request_tester {
 }
 
 sub runonce_middleware {
-    my $value = shift;
+    my ( $value ) = @_;
+
     return sub {
-        my $app = shift;
+        my ( $app ) = @_;
+
         sub {
-            my $env = shift;
+            my ( $env ) = @_;
+
             $env->{'psgi.run_once'} = $value;
             $app->($env);
         };
@@ -119,11 +122,11 @@ subtest 'batch requests to one app instance' => sub {
                 };
             };
 
-            run_test_psgi_for_requests($app, @requests);
+            run_test_psgi_for_requests($app, \@requests);
 
             my $vcr = Plack::VCR->new(filename => $tempfile->filename);
 
-            verify_saved_requests($vcr, @requests);
+            verify_saved_requests($vcr, \@requests);
 
             my $interaction = $vcr->next;
             ok ! $interaction, 'iterator exhausted';
@@ -147,7 +150,7 @@ subtest 'send each request in separate app instance' => sub {
                     };
                 };
 
-                run_test_psgi_for_requests($app, $request);
+                run_test_psgi_for_requests($app, [ $request ]);
             }
 
             my $vcr = Plack::VCR->new(filename => $tempfile->filename);
@@ -155,13 +158,13 @@ subtest 'send each request in separate app instance' => sub {
             if ($runonce) {
                 # in run_once mode (CGI mode), requests are all appended to
                 # the same output file
-                verify_saved_requests($vcr, @requests);
+                verify_saved_requests($vcr, \@requests);
 
             } else {
                 # not-run_once means the file will be overwritten each time
                 # the PSGI app runs.  Only the last request will be in the
                 # output file
-                verify_saved_requests($vcr, $requests[-1]);
+                verify_saved_requests($vcr, [ $requests[-1] ] );
             }
 
             my $interaction = $vcr->next;
