@@ -15,7 +15,9 @@ sub run_test_psgi_for_requests {
 
     test_psgi $app, sub {
         my ( $cb ) = @_;
-        $cb->($_->()) foreach @request_senders;
+        foreach my $sender (@request_senders) {
+            $cb->($sender->());
+        }
     };
 }
 
@@ -23,7 +25,7 @@ sub verify_saved_requests {
     my ( $vcr, $requests ) = @_;
 
     my @request_testers = map { construct_request_tester($_) } @$requests;
-    foreach my $request_test ( @request_testers ) {
+    foreach my $request_test (@request_testers) {
         my $interaction = $vcr->next;
         ok $interaction, 'next interaction';
         $request_test->($interaction->request);
@@ -34,44 +36,44 @@ sub construct_request_sender {
     my ( $req_data ) = @_;
 
     my %req_methods = (
-        GET => \&GET,
+        GET  => \&GET,
         POST => \&POST,
     );
 
-    my($method, $uri, $headers, $content) = @$req_data{'method','uri','headers','content'};
+    my ( $method, $uri, $headers, $content ) = @{$req_data}{qw/method uri headers content/};
     my @args;
-    if ($headers) {
+    if($headers) {
         push @args, @$headers;
     }
-    if ($content) {
-        push @args, ('Content' => $content);
+    if($content) {
+        push @args, (Content => $content);
     }
 
     my $method_sub = $req_methods{$method};
     return sub {
         $method_sub->($uri, @args);
-    }
+    };
 }
 
 sub construct_request_tester {
     my ( $req_data ) = @_;
-    my($method, $uri, $headers, $content) = @$req_data{'method','uri','headers','content'};
+    my ( $method, $uri, $headers, $content ) = @{$req_data}{qw/method uri headers content/};
 
     return sub {
         my ( $req ) = @_;
 
         is($req->method, $method, 'method');
         is($req->uri, $uri, 'uri');
-        if ($headers) {
+        if($headers) {
             for(my $i = 0; $i < @$headers; $i += 2) {
-                my($header, $value) = @$headers[$i, $i+1];
+                my ( $header, $value ) = @{$headers}[$i, $i + 1];
                 is($req->header($header), $value, "header $header");
             }
         }
-        if ($content) {
+        if($content) {
             my @expected_content;
-            for (my $i = 0; $i < @$content; $i += 2) {
-                push @expected_content, join('=', map { my $v = $_; $v =~ s/ /+/g; $v } @$content[$i, $i+1]);
+            for(my $i = 0; $i < @$content; $i += 2) {
+                push @expected_content, join('=', map { my $v = $_; $v =~ s/ /+/g; $v } @{$content}[$i, $i + 1]);
             }
             my $expected_content = join('&', @expected_content);
             is($req->content, $expected_content, 'content');
@@ -107,7 +109,7 @@ my @requests = (
 
 subtest 'batch requests to one app instance' => sub {
     plan tests => 2;
-    foreach my $runonce ( 0 .. 1 ) {
+    foreach my $runonce (0 .. 1) {
         subtest "runonce $runonce" => sub {
             plan tests => 16;
 
@@ -129,14 +131,14 @@ subtest 'batch requests to one app instance' => sub {
             verify_saved_requests($vcr, \@requests);
 
             my $interaction = $vcr->next;
-            ok ! $interaction, 'iterator exhausted';
+            ok !$interaction, 'iterator exhausted';
         };
     }
 };
 
 subtest 'send each request in separate app instance' => sub {
     plan tests => 2;
-    foreach my $runonce ( 0 .. 1 ) {
+    foreach my $runonce (0 .. 1) {
         subtest "runonce $runonce" => sub {
             my $tempfile = File::Temp->new;
             close $tempfile;
@@ -155,7 +157,7 @@ subtest 'send each request in separate app instance' => sub {
 
             my $vcr = Plack::VCR->new(filename => $tempfile->filename);
 
-            if ($runonce) {
+            if($runonce) {
                 # in run_once mode (CGI mode), requests are all appended to
                 # the same output file
                 verify_saved_requests($vcr, \@requests);
@@ -168,7 +170,7 @@ subtest 'send each request in separate app instance' => sub {
             }
 
             my $interaction = $vcr->next;
-            ok ! $interaction, 'iterator exhausted';
+            ok !$interaction, 'iterator exhausted';
             done_testing();
         };
     }
