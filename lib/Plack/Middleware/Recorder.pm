@@ -135,6 +135,7 @@ sub _has_flock {
     return $has_flock if defined $has_flock;
 
     my $fh = IO::File->new(__FILE__, 'r');
+    local $@;
     eval { flock($fh, LOCK_SH) };
     $has_flock = ! $@;
     return $has_flock;
