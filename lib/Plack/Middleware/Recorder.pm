@@ -11,10 +11,11 @@ use HTTP::Request;
 use IO::File;
 use IO::String;
 use Storable qw(nfreeze thaw);
-use File::Spec;
+use Fcntl qw(:flock);
+use Scope::Guard;
 use namespace::clean;
 
-use Plack::Util::Accessor qw/active start_url stop_url _lockmgr/;
+use Plack::Util::Accessor qw/active start_url stop_url/;
 
 sub prepare_app {
     my ( $self ) = @_;
@@ -107,8 +108,8 @@ sub call {
         my $req    = $self->env_to_http_request($env);
         my $frozen = nfreeze($req);
 
-        my $guard = $self->_create_concurrency_lock($env);
         my $fh = $self->_output_fh($env);
+        my $guard = $self->_create_concurrency_lock($fh, $env);
         $fh->write(pack('Na*', length($frozen), $frozen));
         $fh->flush;
     }
@@ -119,25 +120,24 @@ sub call {
 }
 
 sub _create_concurrency_lock {
-    my ( $self, $env ) = @_;
+    my ( $self, $fh, $env ) = @_;
 
-    return undef unless($env->{'psgi.multithread'} || $env->{'psgi.multiprocess'});
+    return undef unless ( ($env->{'psgi.multithread'} || $env->{'psgi.multiprocess'})
+                            and
+                          _has_flock());
 
-    $self->_initialize_locking;
-
-    my $lock = $self->_lockmgr->lock($self->{output_filename});
-    return Scope::Guard->new( sub { $lock->release } );
+    flock($fh, LOCK_EX);
+    return Scope::Guard->new( sub { flock($fh, LOCK_UN) });
 }
 
-sub _initialize_locking {
-    my $self = shift;
+my $has_flock;
+sub _has_flock {
+    return $has_flock if defined $has_flock;
 
-    unless (defined $self->_lockmgr) {
-        require Scope::Guard;
-        require LockFile::Simple;
-        $self->{output_filename} ||= File::Spec->catdir(File::Spec->tmpdir, 'pm-recorder-output');
-        $self->_lockmgr( LockFile::Simple->make(nfs => 1) );
-    }
+    my $fh = IO::File->new(__FILE__, 'r');
+    eval { flock($fh, LOCK_SH) };
+    $has_flock = ! $@;
+    return $has_flock;
 }
 
 

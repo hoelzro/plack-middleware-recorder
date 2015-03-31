@@ -8,22 +8,28 @@ use Plack::VCR;
 use Plack::Test;
 use Test::More;
 use IO::File;
+use Fcntl qw(:flock);
+use Plack::Middleware::Recorder;
 
 my @tests = ( [ 'concurrency off',
                 sub { },
-                sub { ok(! -f $_[0], 'lock file does not exist during write') }
+                sub { ok(! is_flocked($_[0]), 'file is not locked during write') }
               ],
               [ 'multithread concurrency',
                  sub { $_[0]->{'psgi.multithread'} = 1 },
-                 sub { ok(-f $_[0], 'lock file exists during write') }
+                 sub { ok(is_flocked($_[0]), 'file is locked during write') }
               ],
               [ 'multitprocess concurrency',
                 sub { $_[0]->{'psgi.multiprocess'} = 1 },
-                sub { ok(-f $_[0], 'lock file exists during write') }
+                sub { ok(is_flocked($_[0]), 'file is locked during write') }
               ],
 );
 
-plan tests => scalar(@tests);
+if (Plack::Middleware::Recorder::_has_flock()) {
+    plan tests => scalar(@tests);
+} else {
+    plan skip_all => 'flock not supported on this system';
+}
 
 foreach my $test_desc ( @tests ) {
     my($desc, $enable_multi, $lockfile_test) = @$test_desc;
@@ -34,15 +40,13 @@ foreach my $test_desc ( @tests ) {
         my $tempfile = File::Temp->new;
         close $tempfile;
 
-        my $expected_lock_file = "${tempfile}.lock";
-
         # Intercept Recorder's write to the output file and test
         # the locking status
         my $orig_io_file_write = IO::File->can('write');
         no warnings 'once';
         local *IO::File::write = sub {
             my $fh = shift;
-            $lockfile_test->($expected_lock_file);
+            $lockfile_test->($tempfile->filename);
             $fh->$orig_io_file_write(@_);
         };
 
@@ -57,9 +61,9 @@ foreach my $test_desc ( @tests ) {
         test_psgi $app, sub {
             my ( $cb ) = @_;
 
-            ok(! -f $expected_lock_file, 'Before request, lock file does not exist');
+            ok(! is_flocked($tempfile->filename), 'Before request, file is not locked');
             $cb->(GET '/');
-            ok(! -f $expected_lock_file, 'After request, lock file does not exist');
+            ok(! is_flocked($tempfile->filename), 'After request, file is not locked');
         };
 
         my $vcr = Plack::VCR->new(filename => $tempfile->filename);
@@ -81,4 +85,11 @@ sub concurrency_setter_middleware {
             $app->($env);
         };
     };
+}
+
+sub is_flocked {
+    my $filename = shift;
+    my $fh = IO::File->new($filename, 'a');
+    my $not_locked = flock($fh, LOCK_EX | LOCK_NB);
+    return ! $not_locked;
 }
