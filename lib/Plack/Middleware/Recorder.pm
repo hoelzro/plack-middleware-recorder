@@ -125,7 +125,7 @@ sub _create_concurrency_lock {
     my ( $self, $fh, $env ) = @_;
 
     return unless ( ($env->{'psgi.multithread'} || $env->{'psgi.multiprocess'})
-                            and
+                            &&
                           _has_flock());
 
     flock($fh, LOCK_EX);
