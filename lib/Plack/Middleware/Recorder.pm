@@ -111,6 +111,8 @@ sub call {
         my $frozen = nfreeze($req);
 
         my $fh = $self->_output_fh($env);
+        # $guard looks unused, but it's unlocking the file upon its
+        # destruction
         my $guard = $self->_create_concurrency_lock($fh, $env);
         $fh->write(pack('Na*', length($frozen), $frozen));
         $fh->flush;
