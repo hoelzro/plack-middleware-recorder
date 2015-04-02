@@ -11,6 +11,8 @@ use HTTP::Request;
 use IO::File;
 use IO::String;
 use Storable qw(nfreeze thaw);
+use Fcntl qw(:flock);
+use Scope::Guard;
 use namespace::clean;
 
 use Plack::Util::Accessor qw/active start_url stop_url/;
@@ -109,6 +111,7 @@ sub call {
         my $frozen = nfreeze($req);
 
         my $fh = $self->_output_fh($env);
+        my $guard = $self->_create_concurrency_lock($fh, $env);
         $fh->write(pack('Na*', length($frozen), $frozen));
         $fh->flush;
     }
@@ -117,6 +120,29 @@ sub call {
 
     return $app->($env);
 }
+
+sub _create_concurrency_lock {
+    my ( $self, $fh, $env ) = @_;
+
+    return undef unless ( ($env->{'psgi.multithread'} || $env->{'psgi.multiprocess'})
+                            and
+                          _has_flock());
+
+    flock($fh, LOCK_EX);
+    return Scope::Guard->new( sub { flock($fh, LOCK_UN) });
+}
+
+my $has_flock;
+sub _has_flock {
+    return $has_flock if defined $has_flock;
+
+    my $fh = IO::File->new(__FILE__, 'r');
+    local $@;
+    eval { flock($fh, LOCK_SH) };
+    $has_flock = ! $@;
+    return $has_flock;
+}
+
 
 1;
 
@@ -181,10 +207,6 @@ The first release of this distribution was fairly simple; it only records and
 retrieves requests.  In the future, I'd like a bunch of features to be added:
 
 =over 4
-
-=item *
-
-The middleware probably won't function correctly in a concurrent environment like Starman.
 
 =item *
 
