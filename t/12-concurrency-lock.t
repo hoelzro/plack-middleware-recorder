@@ -32,6 +32,8 @@ sub is_flocked {
 
     my $fh         = IO::File->new($filename, 'a');
     my $not_locked = flock($fh, LOCK_EX | LOCK_NB);
+    flock($fh, LOCK_UN);
+    close $fh;
 
     return !$not_locked;
 }
