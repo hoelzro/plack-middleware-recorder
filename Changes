@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.04 April 08 2015
      - POD/prereqs fixes (thanks, Anthony Brummett!)
      - Get the module working with CGI (thanks, Anthony Brummett!)
      - Get the module working with multi-tasking servers (thanks, Anthony Brummett!)
