@@ -10,7 +10,7 @@ use Carp qw(croak);
 use HTTP::Request;
 use IO::File;
 use IO::String;
-use Storable qw(nfreeze thaw);
+use Sereal qw(encode_sereal);
 use Fcntl qw(:flock);
 use Scope::Guard;
 use namespace::clean;
@@ -108,7 +108,7 @@ sub call {
         ];
     } elsif($self->active) {
         my $req    = $self->env_to_http_request($env);
-        my $frozen = nfreeze($req);
+        my $frozen = encode_sereal($req);
 
         my $fh = $self->_output_fh($env);
         # $guard looks unused, but it's unlocking the file upon its
@@ -227,10 +227,6 @@ Currently, authorization works by just copying headers blindly.  This logic coul
 =item *
 
 Request bodies are recorded directly in the output stream, and an in-memory representation is used for psgi.input.  This could be better.
-
-=item *
-
-Stop using L<Storable>; use L<Sereal> or something better.
 
 =back
 

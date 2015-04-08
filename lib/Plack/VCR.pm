@@ -7,7 +7,7 @@ use warnings;
 
 use Carp qw(croak);
 use HTTP::Request;
-use Storable qw(thaw);
+use Sereal qw(decode_sereal);
 use IO::File;
 use Plack::VCR::Interaction;
 use UNIVERSAL;
@@ -43,7 +43,7 @@ sub next {
     my $request = '';
     $bytes = $file->read($request, $size);
     croak "Unexpected end of file" unless $bytes == $size;
-    $request = thaw($request);
+    $request = decode_sereal($request);
 
     croak "Invalid file contents"
         unless UNIVERSAL::isa($request, 'HTTP::Request');

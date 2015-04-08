@@ -84,10 +84,6 @@ Currently, authorization works by just copying headers blindly.  This logic coul
 
 Request bodies are recorded directly in the output stream, and an in-memory representation is used for psgi.input.  This could be better.
 
-=item *
-
-Stop using L<Storable>; use L<Sereal> or something better.
-
 =back
 
 =head2 Others
