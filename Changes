@@ -1,6 +1,10 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+     - POD/prereqs fixes (thanks, Anthony Brummett!)
+     - Get the module working with CGI (thanks, Anthony Brummett!)
+     - Get the module working with multi-tasking servers (thanks, Anthony Brummett!)
+     - Use Sereal instead of Storable
 
 0.03 January 13 2012
      - Bug fix (support web applications that use LWP::UserAgent)
