@@ -2,6 +2,7 @@ use strict;
 use warnings;
 
 use HTTP::Request::Common;
+use Fcntl qw(:flock);
 use File::Temp;
 use Plack::Builder;
 use Plack::VCR;
@@ -25,7 +26,14 @@ my @tests = ( [ 'concurrency off',
               ],
 );
 
-if (Plack::Middleware::Recorder::_has_flock()) {
+my $has_flock = eval {
+    open my $fh, '<', __FILE__;
+    flock($fh, LOCK_EX);
+    close $fh;
+    1;
+};
+
+if ($has_flock) {
     plan tests => scalar(@tests);
 } else {
     plan skip_all => 'flock not supported on this system';

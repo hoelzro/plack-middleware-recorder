@@ -114,8 +114,10 @@ sub call {
         # $guard looks unused, but it's unlocking the file upon its
         # destruction
         my $guard = $self->_create_concurrency_lock($fh, $env);
-        $fh->write(pack('Na*', length($frozen), $frozen));
-        $fh->flush;
+        if($guard) {
+            $fh->write(pack('Na*', length($frozen), $frozen));
+            $fh->flush;
+        }
     }
 
     $env->{__PACKAGE__ . '.active'} = $self->active;
@@ -126,25 +128,25 @@ sub call {
 sub _create_concurrency_lock {
     my ( $self, $fh, $env ) = @_;
 
-    return unless ( ($env->{'psgi.multithread'} || $env->{'psgi.multiprocess'})
-                            &&
-                          _has_flock());
+    return 1 if !$env->{'psgi.multithread'} && !$env->{'psgi.multiprocess'};
 
-    flock($fh, LOCK_EX);
+    my $locked = eval { flock($fh, LOCK_EX) || die "$!\n" };
+
+    if(!$locked) {
+        if(my $log = $env->{'psgix.logger'}) {
+            my $error = $@ || 'Unknown error';
+            chomp $error;
+
+            $log->({
+                level   => 'warn',
+                message => "Unable to lock filehandle in multiprocess environment ($error); skipping recording",
+            });
+        }
+        return;
+    }
+
     return Scope::Guard->new( sub { flock($fh, LOCK_UN) });
 }
-
-my $has_flock;
-sub _has_flock {
-    return $has_flock if defined $has_flock;
-
-    my $fh = IO::File->new(__FILE__, 'r');
-    local $@;
-    eval { flock($fh, LOCK_SH) };
-    $has_flock = ! $@;
-    return $has_flock;
-}
-
 
 1;
 
