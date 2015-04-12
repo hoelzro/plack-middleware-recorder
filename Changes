@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+     - Fix a test to run better on CPAN testers (Thanks, Slaven Rezić!)
 
 0.04 April 08 2015
      - POD/prereqs fixes (thanks, Anthony Brummett!)
