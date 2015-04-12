@@ -19,5 +19,5 @@ test_psgi $recorder_app, sub {
     $cb->(GET '/', Host => 'localhost');
 };
 
-my $output = qx(bin/plack-replay $requests_file t/reply-lwp.psgi -v);
+my $output = qx($^X bin/plack-replay $requests_file t/reply-lwp.psgi -v);
 like $output, qr/200 OK/, 'Using LWP::UserAgent to access an external service should succeed';
