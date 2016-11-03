@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.06 November 02 2016
      - Include META.json (Thanks, Sean Zellmer!)
 
 0.05 April 12 2015

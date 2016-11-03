@@ -8,7 +8,7 @@ Plack::Middleware::Recorder - Plack middleware that records your client-server i
 
 =head1 VERSION
 
-version 0.05
+version 0.06
 
 =head1 SYNOPSIS
 
@@ -116,7 +116,7 @@ the same terms as the Perl 5 programming language system itself.
 =head1 BUGS
 
 Please report any bugs or feature requests on the bugtracker website
-https://github.com/hoelzro/plack-middleware-recorder/issues
+L<https://github.com/hoelzro/plack-middleware-recorder/issues>
 
 When submitting a bug or request, please include a test-file or a
 patch to an existing test-file that illustrates the bug or desired
