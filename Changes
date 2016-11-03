@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+     - Include META.json (Thanks, Sean Zellmer!)
 
 0.05 April 12 2015
      - Fix a test to run better on CPAN testers (Thanks, Slaven Rezić!)
