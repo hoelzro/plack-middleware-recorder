@@ -171,7 +171,7 @@ __END__
 
 This middleware records the stream of requests and responses that your
 application goes through to a file.  The middleware records all requests while
-active; the active state can be altered via L</start_url> and L</stop_url">.
+active; the active state can be altered via L</start_url> and L</stop_url>.
 
 =head1 OPTIONS
 
